@@ -1,17 +1,23 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { todoApi } from "./api/TodoApi";
-import { useEffect } from "react";
+import { todoApi, TodoDTO } from "./api/TodoApi";
+import { useCallback, useEffect, useMemo } from "react";
 import { io } from "socket.io-client";
 
 const todoEventTypes = ["todo-new", "todo-delete"];
 const socket = io("/todo-events");
+
+
+export const todoKeys = {
+  all: ["todos"],
+  todo: (id: number) => [...todoKeys.all, id]
+}
 
 export const useTodos = () => {
   const queryClient = useQueryClient();
   const { data, isLoading, refetch } = useQuery(["todos"], todoApi.getAll, {
     onSuccess: (data) => {
       data.forEach((todo) => {
-        queryClient.setQueryData(["todos", todo.id], todo);
+        queryClient.setQueryData(todoKeys.todo(todo.id), todo);
       });
     }
   });
@@ -20,8 +26,9 @@ export const useTodos = () => {
       console.log(data);
       void refetch();
     };
-    const updateListener = (data: { id: string }) => {
-      void queryClient.invalidateQueries(["todos", data.id]);
+    const updateListener = (data: { id: number }) => {
+      console.log(data);
+      void queryClient.invalidateQueries(todoKeys.todo(data.id));
     };
     todoEventTypes.forEach((event) => {
       socket.on(event, listListener);
@@ -33,5 +40,28 @@ export const useTodos = () => {
     };
   }, [queryClient, refetch]);
 
-  return { data, isLoading };
+  return { todos: data ?? [], isLoading };
+};
+
+export const useTodosMutation = () => {
+  const queryClient = useQueryClient();
+  const addTodo = useCallback(
+    (description: string) => {
+      const tempTodo = { id: -Math.random(), description };
+      queryClient.setQueryData(todoKeys.todo(tempTodo.id), tempTodo);
+      queryClient.setQueryData(todoKeys.all, (old: any) => [...old, tempTodo]);
+      void todoApi.create(description);
+    },
+    [queryClient]
+  );
+
+  const removeTodo = useCallback(
+    (id: number) => {
+      queryClient.setQueryData(todoKeys.all, ((old: TodoDTO[]) =>
+        old.filter((todo) => todo.id !== id)) as any);
+      void todoApi.delete(id);
+    },
+    [queryClient]
+  );
+  return useMemo(() => ({ addTodo, removeTodo }), [addTodo, removeTodo]);
 };
