@@ -26,6 +26,7 @@ export const Todo = ({ remove, todoId }: TodoProps) => {
     setEdit(false);
   },[todo.description, update]);
 
+  // register onClickElsewhere
   useEffect(() => {
     if (edit) {
       const listener = () => {
