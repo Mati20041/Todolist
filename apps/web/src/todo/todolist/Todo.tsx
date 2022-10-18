@@ -1,12 +1,12 @@
 import React, {
   KeyboardEventHandler,
+  useCallback,
   useEffect,
   useRef,
   useState,
 } from "react";
-import { todoApi, TodoDTO } from "../api/TodoApi";
 import styled from "styled-components";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useTodo } from "./useTodo";
 
 interface TodoProps {
   todoId: number;
@@ -14,34 +14,17 @@ interface TodoProps {
 }
 
 export const Todo = ({ remove, todoId }: TodoProps) => {
-  const queryClient = useQueryClient();
-  const { data } = useQuery(["todos", todoId], () => todoApi.getById(todoId));
-  const { mutate: update } = useMutation(
-    ["todos", todoId],
-    (newDescription: string) => todoApi.update(todoId, newDescription),
-    {
-      onMutate: (newDescription) => {
-        queryClient.setQueryData(["todos", todoId], (old: any) => ({
-          ...old,
-          description: newDescription,
-        }));
-      },
-      onSuccess: () => {
-        queryClient.invalidateQueries(["todos", todoId]);
-      },
-    }
-  );
-  const { id, description } = data!;
+  const { update, todo } = useTodo(todoId);
 
   const [edit, setEdit] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const updateTodo = (newDescription: string) => {
-    if (newDescription !== description) {
+  const updateTodo = useCallback((newDescription: string) => {
+    if (newDescription !== todo.description) {
       update(newDescription);
     }
     setEdit(false);
-  };
+  },[todo.description, update]);
 
   useEffect(() => {
     if (edit) {
@@ -72,15 +55,15 @@ export const Todo = ({ remove, todoId }: TodoProps) => {
             ref={inputRef}
             onKeyDown={onEnter}
             type="text"
-            defaultValue={description}
+            defaultValue={todo.description}
             autoFocus
             onClick={(e) => e.stopPropagation()}
           />
         ) : (
-          <span>{description}</span>
+          <span>{todo.description}</span>
         )}
       </StyledDescription>
-      <StyledButton onClick={() => remove(id)}>X</StyledButton>
+      <StyledButton onClick={() => remove(todoId)}>X</StyledButton>
     </StyledTodo>
   );
 };
