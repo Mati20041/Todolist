@@ -1,15 +1,38 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { todoApi, TodoDTO } from "./api/TodoApi";
 import { TodoList } from "./todolist/TodoList";
 import styled from "styled-components";
+import { io } from "socket.io-client";
+import { useEffect } from "react";
+
+const socket = io("/todo-events");
 
 export const TodoView = () => {
-  // const { data, isLoading } = useQuery(["todos"], todoApi.getAll);
+  const { data, isLoading, refetch } = useQuery(["todos"], todoApi.getAll);
 
-  // if(isLoading) {
-  //   return <div>Loading</div>
-  // }
-  const data: TodoDTO[] = [];
+  useEffect(() => {
+    const listener = (...data: any) => {
+      console.log(data);
+      void refetch();
+    };
+    ["todo-new", "todo-update", "todo-delete"].forEach((event) => {
+      socket.on(event, listener);
+    });
+    return () => {
+      ["todo-new", "todo-update", "todo-delete"].forEach((e) =>
+        socket.off(e, listener)
+      );
+    };
+  }, [refetch]);
+
+  if (isLoading) {
+    return <div>Loading</div>;
+  }
+
+  if (!data) {
+    return <div>Error fetching data</div>;
+  }
+
   return (
     data && (
       <StyledLayout>

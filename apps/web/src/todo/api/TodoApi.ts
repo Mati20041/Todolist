@@ -1,6 +1,7 @@
 import axios from "axios";
 
-const todo_url = "http://localhost:3000";
+const todo_url = "";
+// const todo_url = "http://localhost:3000";
 
 export interface TodoDTO {
   id: number;
@@ -23,7 +24,7 @@ class TodoApi {
   }
 
   update(id: number, description: string) {
-    return axios.put(`${todo_url}/todo/${id}`, { description });
+    return axios.patch(`${todo_url}/todo/${id}`, { description });
   }
 
   delete(id: number) {

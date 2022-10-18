@@ -4,7 +4,7 @@ import React, {
   useEffect,
   useState,
 } from "react";
-import { TodoDTO } from "../api/TodoApi";
+import { todoApi, TodoDTO } from "../api/TodoApi";
 import { Todo } from "./Todo";
 
 interface TodoListProps {
@@ -23,16 +23,19 @@ export const TodoList: FunctionComponent<TodoListProps> = ({ todos }) => {
       ...localTodos,
       { id: -Math.random(), description },
     ]);
+    void todoApi.create(description);
   };
 
   const removeTodo = (id: number) => {
     setLocalTodos((localTodos) => localTodos.filter((t) => t.id !== id));
+    void todoApi.delete(id);
   };
 
   const updateTodo = (id: number, description: string) => {
     setLocalTodos((localTodos) =>
       localTodos.map((t) => (t.id === id ? { ...t, description } : t))
     );
+    void todoApi.update(id, description);
   };
 
   const onEnter: KeyboardEventHandler<HTMLInputElement> = (e) => {

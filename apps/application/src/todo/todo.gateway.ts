@@ -1,7 +1,4 @@
-import {
-  WebSocketGateway,
-  WebSocketServer,
-} from '@nestjs/websockets';
+import { WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
 import { Server } from 'socket.io';
 
 @WebSocketGateway({ namespace: 'todo-events' })
@@ -9,7 +6,7 @@ export class TodoGateway {
   @WebSocketServer() private server: Server;
 
   public newTodo(id: number) {
-    this.server.emit('new-todo', { id });
+    this.server.emit('todo-new', { id });
   }
 
   public todoChanged(id: number) {

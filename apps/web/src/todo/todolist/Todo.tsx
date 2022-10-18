@@ -1,4 +1,9 @@
-import React, { KeyboardEventHandler, useEffect, useRef, useState } from "react";
+import React, {
+  KeyboardEventHandler,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { TodoDTO } from "../api/TodoApi";
 import styled from "styled-components";
 
@@ -14,17 +19,19 @@ export const Todo = ({
   todo: { description, id },
 }: TodoProps) => {
   const [edit, setEdit] = useState(false);
-  const inputRef = useRef<HTMLInputElement>(null)
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const updateTodo = (newDescription: string) => {
-    update(id, newDescription);
+    if (newDescription !== description) {
+      update(id, newDescription);
+    }
     setEdit(false);
   };
 
   useEffect(() => {
-    if(edit) {
+    if (edit) {
       const listener = () => {
-        updateTodo(inputRef.current?.value ?? '')
+        updateTodo(inputRef.current?.value ?? "");
       };
       window.addEventListener("click", listener);
       return () => window.removeEventListener("click", listener);
@@ -38,7 +45,12 @@ export const Todo = ({
   };
 
   return (
-    <StyledTodo onClick={e => e.stopPropagation()}>
+    <StyledTodo
+      onClick={(e) => {
+        setEdit(true);
+        e.stopPropagation();
+      }}
+    >
       <StyledDescription>
         {edit ? (
           <input
@@ -47,9 +59,10 @@ export const Todo = ({
             type="text"
             defaultValue={description}
             autoFocus
+            onClick={(e) => e.stopPropagation()}
           />
         ) : (
-          <span onClick={() => setEdit(true)}>{description}</span>
+          <span>{description}</span>
         )}
       </StyledDescription>
       <StyledButton onClick={() => remove(id)}>X</StyledButton>
