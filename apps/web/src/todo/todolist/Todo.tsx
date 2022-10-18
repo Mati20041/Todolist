@@ -87,18 +87,18 @@ export const Todo = ({ remove, todoId }: TodoProps) => {
 
 const StyledDescription = styled.span`
   flex: 1;
-  background-color: #efeded;
+  background-color: rgba(239, 237, 237, 0.8);
   padding: 1rem;
 `;
 
 const StyledButton = styled.span`
   justify-items: center;
-  background-color: aqua;
+  background-color: rgba(178, 84, 215, 0.8);
   display: inline-flex;
   align-items: center;
   text-align: center;
   justify-content: center;
-  width: 1rem;
+  width: 2rem;
   cursor: pointer;
 `;
 
@@ -109,4 +109,5 @@ const StyledTodo = styled.div`
   justify-content: space-between;
   margin: 1rem;
   overflow: hidden;
+  box-shadow: black inset 0 0 1rem;
 `;

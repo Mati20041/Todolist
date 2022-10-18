@@ -1,12 +1,14 @@
 import React, {
   FunctionComponent,
-  KeyboardEventHandler,
+  KeyboardEventHandler, useCallback,
   useEffect,
-  useState,
+  useState
 } from "react";
 import { todoApi, TodoDTO } from "../api/TodoApi";
 import { Todo } from "./Todo";
 import { useQueryClient } from "@tanstack/react-query";
+
+const MemoTodo = React.memo(Todo)
 
 interface TodoListProps {
   todos: TodoDTO[];
@@ -30,10 +32,10 @@ export const TodoList: FunctionComponent<TodoListProps> = ({ todos }) => {
     void todoApi.create(description);
   };
 
-  const removeTodo = (id: number) => {
+  const removeTodo = useCallback((id: number) => {
     setLocalTodos((localTodos) => localTodos.filter((t) => t.id !== id));
     void todoApi.delete(id);
-  };
+  }, []);
 
   const onEnter: KeyboardEventHandler<HTMLInputElement> = (e) => {
     if (e.key === "Enter") {
@@ -46,7 +48,7 @@ export const TodoList: FunctionComponent<TodoListProps> = ({ todos }) => {
     <div>
       <div>
         {localTodos.map((todo) => (
-          <Todo
+          <MemoTodo
             key={todo.id}
             remove={removeTodo}
             todoId={todo.id}
