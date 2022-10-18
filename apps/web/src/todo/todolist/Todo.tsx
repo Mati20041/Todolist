@@ -4,26 +4,41 @@ import React, {
   useRef,
   useState,
 } from "react";
-import { TodoDTO } from "../api/TodoApi";
+import { todoApi, TodoDTO } from "../api/TodoApi";
 import styled from "styled-components";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 interface TodoProps {
-  todo: TodoDTO;
+  todoId: number;
   remove: (id: number) => unknown;
-  update: (id: number, description: string) => unknown;
 }
 
-export const Todo = ({
-  remove,
-  update,
-  todo: { description, id },
-}: TodoProps) => {
+export const Todo = ({ remove, todoId }: TodoProps) => {
+  const queryClient = useQueryClient();
+  const { data } = useQuery(["todos", todoId], () => todoApi.getById(todoId));
+  const { mutate: update } = useMutation(
+    ["todos", todoId],
+    (newDescription: string) => todoApi.update(todoId, newDescription),
+    {
+      onMutate: (newDescription) => {
+        queryClient.setQueryData(["todos", todoId], (old: any) => ({
+          ...old,
+          description: newDescription,
+        }));
+      },
+      onSuccess: () => {
+        queryClient.invalidateQueries(["todos", todoId]);
+      },
+    }
+  );
+  const { id, description } = data!;
+
   const [edit, setEdit] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const updateTodo = (newDescription: string) => {
     if (newDescription !== description) {
-      update(id, newDescription);
+      update(newDescription);
     }
     setEdit(false);
   };

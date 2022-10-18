@@ -5,21 +5,33 @@ import styled from "styled-components";
 import { io } from "socket.io-client";
 import { useEffect } from "react";
 
+const todoEventTypes = ["todo-new", "todo-delete"];
+
 const socket = io("/todo-events");
 
 export const TodoView = () => {
-  const { data, isLoading, refetch } = useQuery(["todos"], todoApi.getAll);
+  const queryClient = useQueryClient()
+  const { data, isLoading, refetch } = useQuery(["todos"], todoApi.getAll, {
+    onSuccess: (data) => {
+      data.forEach(todo => {
+        queryClient.setQueryData(['todos', todo.id], todo)
+      })
+    }
+  });
 
   useEffect(() => {
     const listener = (...data: any) => {
       console.log(data);
       void refetch();
     };
-    ["todo-new", "todo-update", "todo-delete"].forEach((event) => {
+    todoEventTypes.forEach((event) => {
       socket.on(event, listener);
     });
+    socket.on("todo-update", (data) => {
+      void queryClient.invalidateQueries(['todos', data.id])
+    })
     return () => {
-      ["todo-new", "todo-update", "todo-delete"].forEach((e) =>
+      todoEventTypes.forEach((e) =>
         socket.off(e, listener)
       );
     };
