@@ -20,6 +20,7 @@ export const useTodos = () => {
       });
     },
   });
+
   useEffect(() => {
     const listListener = (...data: any) => {
       console.log(data);
