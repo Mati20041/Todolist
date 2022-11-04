@@ -3,6 +3,7 @@ import React from "react";
 import { TodoView } from "./todo/TodoView";
 import { queryClient } from "./QueryClient";
 import styled from "styled-components";
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 
 function App() {
   return (
@@ -11,6 +12,7 @@ function App() {
         <h1>TODO LIST</h1>
         <TodoView />
       </StyledLayout>
+      <ReactQueryDevtools initialIsOpen={false} />
     </QueryClientProvider>
   );
 }
