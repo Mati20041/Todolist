@@ -1,16 +1,15 @@
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { todoApi, TodoDTO } from "./api/TodoApi";
-import { useCallback, useEffect, useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import { io } from "socket.io-client";
 
 const todoEventTypes = ["todo-new", "todo-delete"];
 const socket = io("/todo-events");
 
-
 export const todoKeys = {
   all: ["todos"],
-  todo: (id: number) => [...todoKeys.all, id]
-}
+  todo: (id: number) => ["todo", id],
+};
 
 export const useTodos = () => {
   const queryClient = useQueryClient();
@@ -19,12 +18,12 @@ export const useTodos = () => {
       data.forEach((todo) => {
         queryClient.setQueryData(todoKeys.todo(todo.id), todo);
       });
-    }
+    },
   });
   useEffect(() => {
     const listListener = (...data: any) => {
       console.log(data);
-      void refetch();
+      void queryClient.invalidateQueries(todoKeys.all);
     };
     const updateListener = (data: { id: number }) => {
       console.log(data);
@@ -45,23 +44,24 @@ export const useTodos = () => {
 
 export const useTodosMutation = () => {
   const queryClient = useQueryClient();
-  const addTodo = useCallback(
-    (description: string) => {
+  const { mutate: addTodo } = useMutation(todoApi.create, {
+    onMutate: (description: string) => {
       const tempTodo = { id: -Math.random(), description };
       queryClient.setQueryData(todoKeys.todo(tempTodo.id), tempTodo);
       queryClient.setQueryData(todoKeys.all, (old: any) => [...old, tempTodo]);
-      void todoApi.create(description);
     },
-    [queryClient]
-  );
+    onSuccess: (d, t, c) => {
 
-  const removeTodo = useCallback(
-    (id: number) => {
+      return queryClient.invalidateQueries(todoKeys.all);
+    },
+  });
+
+  const { mutate: removeTodo } = useMutation(todoApi.delete, {
+    onMutate: (id: number) => {
       queryClient.setQueryData(todoKeys.all, ((old: TodoDTO[]) =>
         old.filter((todo) => todo.id !== id)) as any);
-      void todoApi.delete(id);
     },
-    [queryClient]
-  );
+    onSuccess: () => queryClient.invalidateQueries(todoKeys.all),
+  });
   return useMemo(() => ({ addTodo, removeTodo }), [addTodo, removeTodo]);
 };
