@@ -1,11 +1,10 @@
 import {useEffect, useState} from "react";
-import {userApi, UserDTO} from "./api/UserApi";
+import {userApi} from "./api/UserApi";
 import './UserView.css';
+import {useQuery} from "@tanstack/react-query";
 
 export const UserView = () => {
-    const [user, setUser] = useState<UserDTO>();
-    const [error, setError] = useState<string>();
-    const [isLoading, setIsLoading] = useState(true);
+    const {data: user, error, isFetching: isLoading, refetch} = useQuery(['user'], userApi.getUser.bind(userApi));
 
     const [name, setName] = useState("");
 
@@ -13,20 +12,8 @@ export const UserView = () => {
         setName(user?.name ?? "");
     }, [user?.name]);
 
-    useEffect(() => {
-        setIsLoading(true);
-        userApi.getUser().then(user => {
-            setUser(user);
-            setError(undefined);
-        }).catch(error => {
-            setError(error.message);
-        }).finally(() => {
-            setIsLoading(false);
-        });
-    }, []);
-
     if (error) {
-        return <div>Error: {error}</div>;
+        return <div>Error: {JSON.stringify(error)}</div>;
     }
 
     if (isLoading) {
@@ -34,15 +21,7 @@ export const UserView = () => {
     }
 
     const handleUpdate = async (id: string, name: string) => {
-        setIsLoading(true);
-        userApi.update(id, name).then(user => {
-            setUser(user);
-            setError(undefined);
-        }).catch(error => {
-            setError(error.message);
-        }).finally(() => {
-            setIsLoading(false);
-        });
+        userApi.update(id, name).then(() => refetch());
     }
 
     return <form onSubmit={e => {
