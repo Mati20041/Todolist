@@ -4,7 +4,10 @@
   "extends": "./base.json",
   "compilerOptions": {
     "jsx": "react-jsx",
-    "lib": ["ES2015"],
+    "lib": ["ESNext",
+      "dom",
+      "dom.iterable"
+    ],
     "module": "ESNext",
     "target": "es6"
   }

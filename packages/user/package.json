@@ -7,7 +7,7 @@
     "lint": "TIMING=1 eslint \"**/*.ts*\""
   },
   "exports": {
-    ".": "./index.ts"
+    ".": "./index.tsx"
   },
   "devDependencies": {
     "socket.io-client": "^4.5.3",

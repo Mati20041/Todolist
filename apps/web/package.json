@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@repo/user": "*",
     "@tanstack/react-query": "^4.12.0",
     "@tanstack/react-query-devtools": "^4.14.1",
     "@testing-library/jest-dom": "^5.16.5",
@@ -22,16 +23,18 @@
     "web-vitals": "^2.1.4"
   },
   "devDependencies": {
+    "@craco/craco": "^7.1.0",
     "@types/styled-components": "^5.1.26",
+    "craco-babel-loader": "^1.0.4",
     "eslint-config-custom": "*",
     "eslint-config-react-app": "^7.0.1",
     "tsconfig": "*"
   },
   "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "start": "craco start",
+    "build": "craco build",
+    "test": "craco test",
+    "eject": "craco eject"
   },
   "eslintConfig": {
     "extends": [

@@ -1,10 +1,10 @@
 import { QueryClientProvider } from "@tanstack/react-query";
 import React from "react";
-import { TodoView } from "./todo/TodoView";
 import { queryClient } from "./QueryClient";
 import styled from "styled-components";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
-import {UserView} from "./user/UserView";
+// import {UserView} from "./user/UserView";
+import {UserView, Button} from "@repo/user";
 
 function App() {
   return (
@@ -15,6 +15,7 @@ function App() {
         <UserView/>
         <UserView/>
         <UserView/>
+          <Button/>
         {/*<h1>TODO LIST</h1>*/}
         {/*<TodoView />*/}
       </StyledLayout>
