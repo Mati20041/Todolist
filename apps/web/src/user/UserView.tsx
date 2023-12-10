@@ -1,10 +1,20 @@
 import {useEffect, useState} from "react";
 import {userApi} from "./api/UserApi";
 import './UserView.css';
-import {useQuery} from "@tanstack/react-query";
+import {useIsMutating, useMutation, useQuery, useQueryClient} from "@tanstack/react-query";
 
 export const UserView = () => {
-    const {data: user, error, isFetching: isLoading, refetch} = useQuery(['user'], userApi.getUser.bind(userApi));
+    const queryClient = useQueryClient();
+    const {data: user, error, isFetching: isLoading} = useQuery(['user'], userApi.getUser.bind(userApi));
+    const {mutate: updateUser, isLoading: isMutating, error: mutationError} = useMutation(['user'], (args: {
+        id: string,
+        name: string
+    }) => userApi.update(args.id, args.name), {
+        onSuccess: (data) => {
+            void queryClient.setQueryData(['user'], data);
+        }
+    });
+    const isMutatingGlobal = useIsMutating(['user']) > 0;
 
     const [name, setName] = useState("");
 
@@ -12,16 +22,12 @@ export const UserView = () => {
         setName(user?.name ?? "");
     }, [user?.name]);
 
-    if (error) {
-        return <div>Error: {JSON.stringify(error)}</div>;
+    if (error || mutationError) {
+        return <div>Error: {JSON.stringify(error || mutationError)}</div>;
     }
 
-    if (isLoading) {
+    if (isLoading || isMutating) {
         return <div>Loading</div>;
-    }
-
-    const handleUpdate = async (id: string, name: string) => {
-        userApi.update(id, name).then(() => refetch());
     }
 
     return <form onSubmit={e => {
@@ -29,9 +35,9 @@ export const UserView = () => {
         const formData = new FormData(e.currentTarget);
         const name = formData.get("username") as string;
         const id = formData.get("id") as string;
-        void handleUpdate(id, name);
+        void updateUser({id, name});
     }}>
-
+        {<span style={{opacity: isMutatingGlobal? 1: 0}}>Mutating somewhere else</span>}
         <input type="hidden" name="id" id="id" value={user?.id}/>
         <span>
             <label htmlFor="username">Username: </label>

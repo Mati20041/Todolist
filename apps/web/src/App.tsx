@@ -12,6 +12,9 @@ function App() {
       <StyledLayout>
         <h1>USER</h1>
         <UserView/>
+        <UserView/>
+        <UserView/>
+        <UserView/>
         {/*<h1>TODO LIST</h1>*/}
         {/*<TodoView />*/}
       </StyledLayout>
