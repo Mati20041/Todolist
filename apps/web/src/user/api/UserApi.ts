@@ -14,7 +14,9 @@ class UserApi {
     return axios.get<UserDTO>(`${todo_url}/user`).then(({ data }) => data);
   }
   update(id: string, name: string) {
-    return axios.put<UserDTO>(`${todo_url}/user`, { id, name }).then(({ data }) => data);
+    return axios
+      .put<UserDTO>(`${todo_url}/user`, { id, name })
+      .then(({ data }) => data);
   }
 }
 

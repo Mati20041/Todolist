@@ -52,7 +52,6 @@ export const useTodosMutation = () => {
       queryClient.setQueryData(todoKeys.all, (old: any) => [...old, tempTodo]);
     },
     onSuccess: (d, t, c) => {
-
       return queryClient.invalidateQueries(todoKeys.all);
     },
   });

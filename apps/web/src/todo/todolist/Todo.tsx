@@ -19,12 +19,15 @@ export const Todo = ({ remove, todoId }: TodoProps) => {
   const [edit, setEdit] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const updateTodo = useCallback((newDescription: string) => {
-    if (newDescription !== todo.description) {
-      update(newDescription);
-    }
-    setEdit(false);
-  },[todo.description, update]);
+  const updateTodo = useCallback(
+    (newDescription: string) => {
+      if (newDescription !== todo.description) {
+        update(newDescription);
+      }
+      setEdit(false);
+    },
+    [todo.description, update]
+  );
 
   // register onClickElsewhere
   useEffect(() => {

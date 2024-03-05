@@ -4,14 +4,14 @@ import { TodoView } from "./todo/TodoView";
 import { queryClient } from "./QueryClient";
 import styled from "styled-components";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
-import {UserView} from "./user/UserView";
+import { UserView } from "./user/UserView";
 
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <StyledLayout>
         <h1>USER</h1>
-        <UserView/>
+        <UserView />
         {/*<h1>TODO LIST</h1>*/}
         {/*<TodoView />*/}
       </StyledLayout>
