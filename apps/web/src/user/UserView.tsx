@@ -1,53 +1,15 @@
 import { useEffect, useState } from 'react'
-import { userApi, UserDTO } from './api/UserApi'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import './UserView.css'
-import { queryOptions } from '../queryOptions'
-
-const fetchUserQueryOptions = queryOptions({
-    queryKey: ['my-user'],
-    queryFn: userApi.getUser,
-})
+import { useUser, useUserMutation } from './useUser'
 
 export const UserView = () => {
-    const queryClient = useQueryClient()
-    const { data: user, isLoading, error } = useQuery(fetchUserQueryOptions)
-
+    const { data: user, isLoading, error } = useUser()
     const {
         mutate: handleUpdate,
         isLoading: isPending,
         error: mutationError,
-    } = useMutation({
-        mutationKey: ['my-user'],
-        mutationFn: ({ id, name }: { id: string; name: string }) =>
-            userApi.update(id, name),
-        onMutate: async ({ name }) => {
-            await queryClient.cancelQueries({
-                queryKey: fetchUserQueryOptions.queryKey,
-            })
+    } = useUserMutation()
 
-            const previousValue = queryClient.getQueryData<UserDTO>(
-                fetchUserQueryOptions.queryKey,
-            )
-
-            queryClient.setQueryData(
-                fetchUserQueryOptions.queryKey,
-                (data: UserDTO | undefined) => data && { ...data, name },
-            )
-            return { previousValue }
-        },
-        onError: (error, variables, context) => {
-            context &&
-                queryClient.setQueryData(
-                    fetchUserQueryOptions.queryKey,
-                    context.previousValue,
-                )
-        },
-        // onSuccess: (data) =>
-        //     queryClient.setQueryData(fetchUserQueryOptions.queryKey, data),
-        onSettled: () =>
-            queryClient.invalidateQueries(fetchUserQueryOptions.queryKey),
-    })
     const [name, setName] = useState('')
 
     useEffect(() => {
