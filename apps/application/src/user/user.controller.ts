@@ -1,6 +1,7 @@
 import { Body, Controller, Get, Put } from '@nestjs/common';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.entity';
+import { UserGateway } from './user.gateway';
 
 @Controller('user')
 export class UserController {
@@ -10,6 +11,8 @@ export class UserController {
     age: 32,
   };
 
+  constructor(private readonly userGateway: UserGateway) {}
+
   @Get()
   getUser() {
     return this.user;
@@ -18,6 +21,7 @@ export class UserController {
   @Put()
   update(@Body() updateUserDto: UpdateUserDto) {
     this.user.name = updateUserDto.name;
+    this.userGateway.userChanged();
     return this.user;
   }
 }
