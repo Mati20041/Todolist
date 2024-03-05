@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import './UserView.css'
-import { useUser, useUserMutation } from './useUser'
+import { useIsUserMutating, useUser, useUserMutation } from './useUser'
 
 export const UserView = () => {
     const { data: user, isLoading, error } = useUser()
@@ -9,6 +9,7 @@ export const UserView = () => {
         isLoading: isPending,
         error: mutationError,
     } = useUserMutation()
+    const isGlobalPending = useIsUserMutating();
 
     const [name, setName] = useState('')
 
@@ -20,7 +21,7 @@ export const UserView = () => {
         return <div>Error: {JSON.stringify(error ?? mutationError)}</div>
     }
 
-    if (isLoading || isPending) {
+    if (isLoading) {
         return <div>Loading</div>
     }
 
@@ -55,6 +56,9 @@ export const UserView = () => {
             </span>
             <span>
                 <label>Mutation: {JSON.stringify(isPending)}</label>
+            </span>
+            <span>
+                <label>Global Mutation: {JSON.stringify(isGlobalPending)}</label>
             </span>
             <button type="submit">Submit</button>
         </form>

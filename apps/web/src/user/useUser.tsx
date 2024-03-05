@@ -1,12 +1,14 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient, useIsMutating } from '@tanstack/react-query'
 import { userApi, UserDTO } from './api/UserApi'
 import { queryOptions } from '../queryOptions'
 
 
+// don't use onError, onSuccess etc,
 const fetchUserQueryOptions = queryOptions({
     queryKey: ['my-user'],
     queryFn: userApi.getUser,
 })
+
 export function useUser() {
     return useQuery(fetchUserQueryOptions)
 }
@@ -44,4 +46,8 @@ export function useUserMutation() {
         onSettled: () =>
             queryClient.invalidateQueries(fetchUserQueryOptions.queryKey),
     })
+}
+
+export const useIsUserMutating = () => {
+    return useIsMutating(['my-user']) > 0;
 }
