@@ -7,6 +7,7 @@ export class UserController {
   user: User = {
     id: 1,
     name: 'John Doe',
+    age: 32,
   };
 
   @Get()

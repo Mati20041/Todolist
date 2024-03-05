@@ -6,6 +6,7 @@ const todo_url = "";
 export interface UserDTO {
   id: number;
   name: string;
+  age: number;
 }
 
 class UserApi {
