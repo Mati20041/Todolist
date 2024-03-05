@@ -12,17 +12,18 @@ import { ReactNode, useEffect } from 'react'
 const socket = io('/user-events')
 
 // don't use onError, onSuccess etc,
-const fetchUserQueryOptions = queryOptions({
+const fetchUserQueryOptions = <T,>(select?: (user: UserDTO) => T) => queryOptions({
     queryKey: ['my-user'],
     queryFn: userApi.getUser,
     staleTime: 60000,
+    select
 })
 
 export const UserListener = ({ children }: { children: ReactNode }) => {
     const queryClient = useQueryClient()
     useEffect(() => {
         const listener = () => {
-            void queryClient.invalidateQueries(fetchUserQueryOptions.queryKey)
+            void queryClient.invalidateQueries(fetchUserQueryOptions().queryKey)
         }
         socket.on('user-update', listener)
 
@@ -33,8 +34,8 @@ export const UserListener = ({ children }: { children: ReactNode }) => {
     return <>{children}</>
 }
 
-export function useUser() {
-    return useQuery(fetchUserQueryOptions)
+export function useUser<T = UserDTO>(select?: (user: UserDTO) => T) {
+    return useQuery(fetchUserQueryOptions(select))
 }
 
 export function useUserMutation() {
@@ -45,15 +46,15 @@ export function useUserMutation() {
             userApi.update(id, name),
         onMutate: async ({ name }) => {
             await queryClient.cancelQueries({
-                queryKey: fetchUserQueryOptions.queryKey,
+                queryKey: fetchUserQueryOptions().queryKey,
             })
 
             const previousValue = queryClient.getQueryData<UserDTO>(
-                fetchUserQueryOptions.queryKey,
+                fetchUserQueryOptions().queryKey,
             )
 
             queryClient.setQueryData(
-                fetchUserQueryOptions.queryKey,
+                fetchUserQueryOptions().queryKey,
                 (data: UserDTO | undefined) => data && { ...data, name },
             )
             return { previousValue }
@@ -61,14 +62,14 @@ export function useUserMutation() {
         onError: (error, variables, context) => {
             context &&
                 queryClient.setQueryData(
-                    fetchUserQueryOptions.queryKey,
+                    fetchUserQueryOptions().queryKey,
                     context.previousValue,
                 )
         },
         // onSuccess: (data) =>
         //     queryClient.setQueryData(fetchUserQueryOptions.queryKey, data),
         onSettled: () =>
-            queryClient.invalidateQueries(fetchUserQueryOptions.queryKey),
+            queryClient.invalidateQueries(fetchUserQueryOptions().queryKey),
     })
 }
 

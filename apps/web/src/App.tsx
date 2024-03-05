@@ -6,6 +6,7 @@ import styled from 'styled-components'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import { UserView } from './user/UserView'
 import { UserListener } from './user/useUser'
+import {UserAge} from "./user/UserAge";
 
 function App() {
     const [count, setCount] = useState(3)
@@ -18,6 +19,7 @@ function App() {
                 </button>
                 <button onClick={() => setShow(!show)}>toggle listener</button>
                 <h1>USER</h1>
+                <UserAge/>
                 {show && (
                     <UserListener>
                         {Array.from({ length: count }, (v, index) => (
