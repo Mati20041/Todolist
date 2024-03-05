@@ -1,11 +1,17 @@
 import { useEffect, useState } from 'react'
-import { userApi, UserDTO } from './api/UserApi'
+import { userApi } from './api/UserApi'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import './UserView.css'
+import { queryOptions } from '../queryOptions'
+
+const fetchUserQueryOptions = queryOptions({
+    queryKey: ['my-user'],
+    queryFn: userApi.getUser,
+})
 
 export const UserView = () => {
-    const [user, setUser] = useState<UserDTO>()
-    const [error, setError] = useState<string>()
-    const [isLoading, setIsLoading] = useState(true)
+    const queryClient = useQueryClient()
+    const { data: user, isLoading, error } = useQuery(fetchUserQueryOptions)
 
     const [name, setName] = useState('')
 
@@ -13,44 +19,24 @@ export const UserView = () => {
         setName(user?.name ?? '')
     }, [user?.name])
 
-    useEffect(() => {
-        setIsLoading(true)
-        userApi
-            .getUser()
-            .then((user) => {
-                setUser(user)
-                setName(user?.name ?? '')
-                setError(undefined)
-            })
-            .catch((error) => {
-                setError(error.message)
-            })
-            .finally(() => {
-                setIsLoading(false)
-            })
-    }, [])
-
     if (error) {
-        return <div>Error: {error}</div>
+        return <div>Error: {JSON.stringify(error)}</div>
     }
 
     if (isLoading) {
         return <div>Loading</div>
     }
-
     const handleUpdate = async (id: string, name: string) => {
-        setIsLoading(true)
         userApi
             .update(id, name)
-            .then((user) => {
-                setUser(user)
-                setError(undefined)
-            })
-            .catch((error) => {
-                setError(error.message)
-            })
+            .then((updatedUser) =>
+                queryClient.setQueryData(
+                    fetchUserQueryOptions.queryKey,
+                    updatedUser,
+                ),
+            )
             .finally(() => {
-                setIsLoading(false)
+                queryClient.invalidateQueries(fetchUserQueryOptions.queryKey)
             })
     }
 
